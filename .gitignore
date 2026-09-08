@@ -7,5 +7,5 @@ __pycache__/
 # NOTE: data/ is deliberately NOT ignored. Curated and vendored files are the
 # spec; machine-owned artefacts are listed individually instead.
 data/*.tmp
-data/series.json
+data/board.json
 data/updater-state.json
