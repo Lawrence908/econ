@@ -1,0 +1,22 @@
+# The Dockerfile does `COPY src/ /usr/share/nginx/html/` wholesale, so anything
+# sitting in src/ becomes a public URL on the next deploy. These are working
+# files that must not:
+#
+#   src/_fontcompare.html  ->  would publish econ.chrislawrence.ca/_fontcompare.html
+#
+# src/fonts/ is deliberately NOT excluded: the page adopted Oswald as a real
+# webfont (@font-face -> /fonts/oswald.woff2), so the asset has to ship with
+# the rule that needs it. Its SIL licence travels beside it in the same
+# directory, which is a redistribution condition, not decoration.
+src/_*
+
+# Browser-automation scratch: screenshots and page snapshots taken while
+# checking the rendered page. Working notes, never image content.
+.playwright-mcp/
+
+# Not copied by the Dockerfile, but excluded so a stray `COPY .` in future
+# cannot pick them up.
+.git/
+data/
+screenshots/
+*.md

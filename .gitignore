@@ -14,5 +14,4 @@ data/updater-state.json
 # disk deliberately; .dockerignore stops them reaching the image, this stops
 # them reaching a commit.
 src/_*
-src/fonts/
 .playwright-mcp/
