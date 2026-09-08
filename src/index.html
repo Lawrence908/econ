@@ -6,7 +6,18 @@
 <title>The Cycle Board: Ten Trackers, One Page</title>
 <meta name="description" content="Ten narrow economic trackers on one page: what each says right now in its own words with its own printed rule, the computed order in which their clocks have historically rung, and every headline series normalized to a trailing ten-year z-score. Nothing here is authored; every figure was computed by the tracker it is attributed to.">
 <link rel="stylesheet" href="/shared-footer/footer.css">
+<link rel="preload" href="/fonts/oswald.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* The only web font on the page, self-hosted so this stays a static site with
+   no third-party fetch. Latin subset, ~13KB, used for ten uppercase words.
+   Oswald, SIL Open Font License 1.1, see fonts/Oswald-OFL.txt. */
+@font-face {
+  font-family: "Oswald";
+  src: url(/fonts/oswald.woff2) format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
 :root {
   color-scheme: light;
   --surface-1: #fcfcfb;
@@ -17,6 +28,8 @@
   --grid: #e1e0d9;
   --axis: #c3c2b7;
   --border: rgba(11,11,11,0.10);
+  --row-bg: #f1efe5;
+  --row-edge: rgba(11,11,11,0.14);
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;
@@ -36,6 +49,8 @@
     --grid: #2c2c2a;
     --axis: #383835;
     --border: rgba(255,255,255,0.10);
+    --row-bg: #242422;
+    --row-edge: rgba(255,255,255,0.16);
     --series-1: #3987e5;
     --series-2: #d95926;
     --series-3: #199e70;
@@ -55,6 +70,8 @@
   --grid: #2c2c2a;
   --axis: #383835;
   --border: rgba(255,255,255,0.10);
+  --row-bg: #242422;
+  --row-edge: rgba(255,255,255,0.16);
   --series-1: #3987e5;
   --series-2: #d95926;
   --series-3: #199e70;
@@ -159,10 +176,12 @@ tr.miss td { background: rgba(179,84,30,0.07); }
 
 /* ---- econ-only additions ---- */
 .board { display: grid; gap: 10px; margin: 4px 0 0; }
+/* Board rows sit on a warmer plane than the card they live in, so the ten
+   readings read as a distinct object rather than as more of the page. */
 .row {
-  display: grid; grid-template-columns: 14px 1fr auto; gap: 12px; align-items: start;
-  background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
-  padding: 12px 14px; text-decoration: none; color: inherit;
+  display: grid; grid-template-columns: 14px minmax(0,1fr) auto; gap: 12px; align-items: start;
+  background: var(--row-bg); border: 1px solid var(--row-edge); border-radius: 10px;
+  padding: 12px 16px; text-decoration: none; color: inherit;
 }
 .row:hover { border-color: var(--axis); }
 .row .sdot { width: 9px; height: 9px; border-radius: 50%; background: var(--series-3); margin-top: 6px; }
@@ -171,8 +190,26 @@ tr.miss td { background: rgba(179,84,30,0.07); }
 .row .lab { font-weight: 650; letter-spacing: -0.01em; }
 .row .det { font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px; }
 .row .who { font-size: 0.76rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
-.row .when { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.row .right { text-align: right; }
+/* The domain word: which tracker this is, legible before the sentence is read.
+   Condensed, so ten of them stack without the longest ("YIELD CURVE") setting
+   the column width; the fallback stack is condensed too, so a font that fails
+   to load shifts the weight but not the layout. */
+.row .dom {
+  font-family: "Oswald", "Helvetica Neue", "Arial Narrow", "Liberation Sans Narrow", system-ui, sans-serif;
+  font-stretch: condensed;
+  font-size: 1.5rem; font-weight: 600; line-height: 1.05;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-primary); white-space: nowrap;
+}
+.row[data-state="signal"] .dom { color: var(--series-2); }
+.row .when { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; margin-top: 3px; }
 .row .flag { color: var(--warn); font-size: 0.76rem; display: block; }
+@media (max-width: 560px) {
+  .row { grid-template-columns: 14px minmax(0,1fr); }
+  .row .right { grid-column: 2; text-align: left; }
+  .row .dom { font-size: 1.3rem; white-space: normal; }
+}
 
 /* Diverging bars for the sequence: leads one hue, lags the other, a neutral
    zero rule between them. Validated for CVD against both surfaces. */
@@ -636,6 +673,17 @@ tr.miss td { background: rgba(179,84,30,0.07); }
   // ------------------------------------------------------------------
   // the board
   // ------------------------------------------------------------------
+  // The word that names the domain, not the question. Each tracker titles
+  // itself as a question ("Is the Consumer Holding Up?"), which is the right
+  // headline and the wrong label: you cannot scan ten questions. Hand-declared
+  // rather than derived, because the id is a slug and a slug is not a noun.
+  var DOMAIN = {
+    yield: "Yield Curve", housing: "Housing", credit: "Credit",
+    lending: "Lending", freight: "Freight", consumer: "Consumer",
+    output: "Output", jobs: "Jobs", debt: "Debt", diesel: "Diesel"
+  };
+  function domainWord(r) { return DOMAIN[r.id] || String(r.id || "").replace(/[-_]/g, " "); }
+
   function buildBoard(p) {
     var rows = (p.board || []).slice();
     // Signal first, then stale last, then by how recent the reading is.
@@ -654,15 +702,17 @@ tr.miss td { background: rgba(179,84,30,0.07); }
           '<span class="sdot"></span><div><div class="lab">' + esc(r.name) + "</div>" +
           '<div class="det">This tracker could not be read and has no stored reading to fall back on.</div>' +
           '<div class="who">' + esc(r.id) + "</div></div>" +
-          '<div class="when"><span class="flag">unavailable</span></div></div>';
+          '<div class="right"><div class="dom">' + esc(domainWord(r)) + "</div>" +
+          '<div class="when"><span class="flag">unavailable</span></div></div></div>';
       }
       return '<a class="row" href="' + esc(r.url) + '" data-state="' + esc(h.state) +
         '" data-stale="' + (r.stale ? "true" : "false") + '" title="' + esc(h.rule) + '">' +
         '<span class="sdot"></span><div><div class="lab">' + esc(h.label) + "</div>" +
         '<div class="det">' + esc(h.detail) + "</div>" +
         '<div class="who">' + esc(r.name) + "</div></div>" +
+        '<div class="right"><div class="dom">' + esc(domainWord(r)) + "</div>" +
         '<div class="when">' + esc(String(h.as_of).slice(0, 7)) +
-        (r.stale ? '<span class="flag">stale</span>' : "") + "</div></a>";
+        (r.stale ? '<span class="flag">stale</span>' : "") + "</div></div></a>";
     }).join("");
   }
 
