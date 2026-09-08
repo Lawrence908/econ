@@ -1,0 +1,5 @@
+{
+ "series_group": "meta",
+ "built": "2026-09-08",
+ "note": "econ authors no figure of its own. Every value on the page was computed by one of the ten trackers and is carried verbatim with that tracker's printed rule. The only transforms here are a stated monthly resample of the overlay series and, in the browser at render time, the z-score and percentile normalization econ-core's contract reserved. No normalized series is ever stored: the raw series is the artifact of record."
+}

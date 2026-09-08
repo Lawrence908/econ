@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Cycle Board: Ten Trackers, One Page</title>
+<meta name="description" content="Ten narrow economic trackers on one page: what each says right now in its own words with its own printed rule, the computed order in which their clocks have historically rung, and every headline series normalized to a trailing ten-year z-score. Nothing here is authored; every figure was computed by the tracker it is attributed to.">
+<link rel="stylesheet" href="/shared-footer/footer.css">
+<style>
+:root {
+  color-scheme: light;
+  --surface-1: #fcfcfb;
+  --plane: #f9f9f7;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11,11,11,0.10);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #4a3aa7;
+  --tooltip-bg: rgba(252,252,251,0.97);
+  --warn: #b3541e;
+  --band-alpha: 0.09;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --plane: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255,255,255,0.10);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #9085e9;
+    --tooltip-bg: rgba(26,26,25,0.97);
+    --warn: #e08a4f;
+    --band-alpha: 0.13;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-1: #1a1a19;
+  --plane: #0d0d0d;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --muted: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255,255,255,0.10);
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #9085e9;
+  --tooltip-bg: rgba(26,26,25,0.97);
+  --warn: #e08a4f;
+  --band-alpha: 0.13;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--plane);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 32px 20px 8px; }
+
+header h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.02em; }
+header p.sub { margin: 0; color: var(--text-secondary); max-width: 68ch; }
+.chip {
+  display: inline-flex; align-items: baseline; gap: 8px; margin-top: 16px;
+  padding: 5px 12px; border: 1px solid var(--border); border-radius: 999px;
+  background: var(--surface-1); font-size: 0.82rem; color: var(--text-secondary);
+}
+.chip[hidden] { display: none; }
+.chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--series-3); flex: none; align-self: center; }
+.chip[data-state="signal"] .dot { background: var(--series-2); }
+.chip b { color: var(--text-primary); font-weight: 650; }
+.stamp { margin-top: 10px; font-size: 0.82rem; color: var(--muted); }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 24px 0 8px; }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.tile .label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+.swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.tile .value { font-size: 1.85rem; font-weight: 650; letter-spacing: -0.02em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.tile .note { font-size: 0.8rem; color: var(--text-secondary); }
+
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 18px 18px 14px; margin: 16px 0; }
+.card h2 { font-size: 1.05rem; margin: 0 0 2px; letter-spacing: -0.01em; }
+.card p.cap { margin: 0 0 12px; font-size: 0.85rem; color: var(--text-secondary); max-width: 90ch; }
+
+.duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 12px; }
+.group { display: flex; gap: 4px; flex-wrap: wrap; }
+.group .glabel { font-size: 0.78rem; color: var(--muted); align-self: center; margin-right: 4px; }
+button.seg {
+  font: inherit; font-size: 0.82rem; padding: 5px 11px; cursor: pointer;
+  background: transparent; color: var(--text-secondary);
+  border: 1px solid var(--border); border-radius: 999px;
+}
+button.seg:hover { background: var(--grid); }
+button.seg[aria-pressed="true"] { background: var(--text-primary); color: var(--surface-1); border-color: var(--text-primary); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 8px; font-size: 0.85rem; color: var(--text-secondary); }
+.legend span.item { display: flex; align-items: center; gap: 7px; }
+.legend .swatch { width: 14px; height: 3px; border-radius: 2px; }
+.legend .swatch.dashed { background: none !important; border-top: 3px dashed; width: 14px; height: 0; border-radius: 0; }
+.legend .swatch.band { width: 14px; height: 10px; border: 1px solid var(--border); }
+
+.plot { position: relative; width: 100%; }
+canvas { display: block; width: 100%; touch-action: pan-y; }
+.tooltip {
+  position: absolute; pointer-events: none; opacity: 0; transition: opacity .08s;
+  background: var(--tooltip-bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 10px; font-size: 0.8rem; line-height: 1.45; white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.14); z-index: 5; color: var(--text-primary);
+}
+.tooltip .tdate { color: var(--muted); font-size: 0.74rem; margin-bottom: 3px; }
+.tooltip .trow { display: flex; align-items: center; gap: 7px; }
+.tooltip .tval { font-variant-numeric: tabular-nums; margin-left: auto; padding-left: 14px; font-weight: 600; }
+
+.status { color: var(--text-secondary); font-size: 0.9rem; padding: 40px 0; text-align: center; }
+
+table { border-collapse: collapse; width: 100%; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 5px 8px; border-bottom: 1px solid var(--grid); }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
+td .tag { color: var(--muted); font-size: 0.78rem; }
+tr.running td { background: rgba(235,104,52,0.06); }
+tr.miss td { background: rgba(179,84,30,0.07); }
+.verdict-bad { color: var(--warn); font-weight: 600; }
+.gapnote { font-size: 0.85rem; color: var(--warn); border: 1px dashed var(--warn); border-radius: 8px; padding: 10px 12px; margin: 6px 0 0; }
+.tablewrap { overflow-x: auto; }
+
+.prose { font-size: 0.92rem; color: var(--text-secondary); }
+.prose h3 { font-size: 0.95rem; color: var(--text-primary); margin: 18px 0 6px; }
+.prose ul { padding-left: 20px; margin: 6px 0; }
+.prose li { margin-bottom: 7px; }
+.prose a { color: var(--series-1); }
+.prose code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.88em; background: var(--plane); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+
+/* A figure the data could not supply renders as a visible gap, never as a
+   silently vanished number. */
+[data-tok] { font-variant-numeric: tabular-nums; }
+.tok-missing { color: var(--warn); border-bottom: 1px dashed var(--warn); }
+
+
+/* ---- econ-only additions ---- */
+.board { display: grid; gap: 10px; margin: 4px 0 0; }
+.row {
+  display: grid; grid-template-columns: 14px 1fr auto; gap: 12px; align-items: start;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 14px; text-decoration: none; color: inherit;
+}
+.row:hover { border-color: var(--axis); }
+.row .sdot { width: 9px; height: 9px; border-radius: 50%; background: var(--series-3); margin-top: 6px; }
+.row[data-state="signal"] .sdot { background: var(--series-2); }
+.row[data-stale="true"] { opacity: 0.72; }
+.row .lab { font-weight: 650; letter-spacing: -0.01em; }
+.row .det { font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px; }
+.row .who { font-size: 0.76rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.row .when { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.row .flag { color: var(--warn); font-size: 0.76rem; display: block; }
+
+/* Diverging bars for the sequence: leads one hue, lags the other, a neutral
+   zero rule between them. Validated for CVD against both surfaces. */
+.bar { position: relative; height: 15px; min-width: 130px; }
+.bar i { position: absolute; top: 2px; height: 11px; border-radius: 3px; display: block; }
+.bar .zero { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--axis); }
+.bar .lead { background: var(--series-1); }
+.bar .lag { background: var(--series-2); }
+
+.smalls { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; margin-top: 4px; }
+.small { border: 1px solid var(--border); border-radius: 10px; padding: 10px 10px 4px; background: var(--surface-1); }
+.small h3 { margin: 0; font-size: 0.86rem; letter-spacing: -0.01em; }
+.small p { margin: 1px 0 6px; font-size: 0.75rem; color: var(--muted); }
+.small .plot { position: relative; }
+
+/* The hub footer is styled by /shared-footer/footer.css, linked above and
+   served by Caddy's shared_footer snippet. Deliberately not restyled here. */
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>The Cycle Board</h1>
+    <p class="sub">Ten narrow trackers, each answering one question about the US and Canadian economy, read together. This page authors nothing: every state below was computed by the tracker it names, and is shown in that tracker's own words with that tracker's own printed rule attached. What this page adds is arrangement, and one arithmetic the trackers cannot do alone, which is putting their clocks in order.</p>
+    <p class="chip" id="chip" hidden></p>
+    <p class="stamp" id="stamp">Reading the ten trackers…</p>
+  </header>
+
+  <section class="card">
+    <h2>What each tracker says right now</h2>
+    <p class="cap">One row per tracker, the ones showing a signal first. The bold clause and the figures beneath it are rendered verbatim from each tracker's published status block; hover a row to see the rule that produced it. Click through for the history, the episode table, and the sources.</p>
+    <div class="board" id="board"></div>
+    <p class="status" id="status">Reading the ten trackers…</p>
+  </section>
+
+  <section class="card">
+    <h2>The order the clocks ring in</h2>
+    <p class="cap"><strong>A lead is positive, a lag is negative.</strong> Four of these tables publish a lag rather than a lead, and their published figure is negated here to put every clock on one axis; the table prints both numbers so the conversion is auditable. Each row is the median across that tracker's own credited episodes, computed by that tracker, not here.</p>
+    <div class="tablewrap"><table id="seq-tbl">
+      <thead><tr><th>Clock</th><th>Tracker</th><th>Median</th><th>Lead or lag</th><th>Episodes</th><th>Span</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <div class="prose" style="margin:12px 0 0">
+      <p><strong>Read the counts before the ordering.</strong> These medians come from samples that are not comparable in size or era: <span data-tok="widest_span">…</span> against a survey that only starts in 1990, on definitions of an episode that each tracker chose for its own series. The ordering is a description of what these twelve tables contain, not a schedule, and a median of four episodes is not a forecast of the fifth.</p>
+      <p>What survives those caveats is a shape. The turning points come first and the thresholds come later: housing's crest, freight's crest and the consumer's confidence peak all sit more than a year ahead, the curve and credit's complacency trough about a year ahead, and everything from lending's alarm downward arrives at or after the recession itself. <strong>Production's crest sits at exactly <span data-tok="output_crest">…</span> months</strong>, which is the hinge: industrial production is one of the series the NBER's committee reads to date a recession, so it does not anticipate the cycle, it constitutes it. Below that line every clock is confirming something already underway.</p>
+      <p id="noclock-note"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Every tracker's headline series, on one scale</h2>
+    <p class="cap">A crack spread in dollars a barrel and a survey balance in net percent cannot share an axis. These can: each series is scored against its own trailing ten years, so every panel reads in the same units of "unusual for this series lately". Ten panels rather than ten lines on one chart, because ten overlaid series is a colour puzzle rather than a chart. Shared axes throughout; shaded bands are US recessions.</p>
+    <div class="controls">
+      <div class="group" role="group" aria-label="Normalization">
+        <span class="glabel">Scale</span>
+        <button class="seg" data-norm="z" aria-pressed="true">Z-score</button>
+        <button class="seg" data-norm="pct" aria-pressed="false">Percentile</button>
+      </div>
+      <div class="group" role="group" aria-label="Orientation">
+        <span class="glabel">Orient</span>
+        <button class="seg" data-orient="1" aria-pressed="false">Stress upward</button>
+      </div>
+    </div>
+    <p class="prose" id="norm-note" style="margin:0 0 10px"></p>
+    <div class="smalls" id="smalls"></div>
+  </section>
+
+  <section class="card">
+    <h2>How to read this page</h2>
+    <div class="prose" style="margin-top:6px">
+      <ul>
+        <li><strong>Nothing here is authored.</strong> Every state, figure and rule on the board was computed by the tracker it is attributed to and is carried across verbatim. If this page and a tracker ever disagree, the tracker is right and this page has a bug.</li>
+        <li><strong>Two transforms happen here and nowhere else.</strong> Overlay series are resampled to monthly, keeping the last observation in each month, because a daily spread and a quarterly survey cannot otherwise share an axis. And the z-score or percentile is computed in your browser from the raw monthly observations in the payload, never stored, because the raw series is the record and a normalized one is a view of it.</li>
+        <li><strong>A z-score against a trailing ten years is a statement about recent history, not about levels.</strong> Industrial production and federal debt both rise across decades; scoring them this way asks whether they are unusual for the last ten years, which is the right question for a cycle board and the wrong one for comparing levels. The trackers are where levels are read.</li>
+        <li><strong>There is no composite score on this page and there will not be one.</strong> Ten honest indicators averaged into a single number would be the most quotable and least defensible thing here, and it would hide exactly the disagreements the board exists to show.</li>
+        <li><strong>A tracker that cannot be reached keeps its last known row</strong>, marked stale and dated to its own last observation. A stale reading is still a true reading about its own date; presenting it as today's would not be.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>The ten trackers, and the contract underneath them</h2>
+    <div class="prose" style="margin-top:6px">
+      <ul id="tracker-list"></ul>
+      <h3>Plumbing</h3>
+      <ul>
+        <li>Each tracker publishes <code>analysis.status.headline</code>: a binary state, a label, the figures behind it, the observation date it was computed from, and the printed rule. That block is this page's entire interface; it reads nothing else about the page that produced it, which is why a tracker can be rewritten without touching this one.</li>
+        <li>The clock map, which says where each tracker's median lead lives in its payload and what that clock is called, is hand-declared here with a note per entry. Every tracker names its own clock (crest, trough, alarm, slump, confidence peak), so inferring which statistic means "lead" would eventually pick the wrong one.</li>
+        <li>This page fetches no upstream data source and holds no API key. It reads the ten trackers over the internal network on a daily schedule, after each of them has refreshed.</li>
+        <li>Series, provenance and revision policy all follow the shared <a href="https://github.com/Lawrence908">econ-core</a> contract.</li>
+        <li>Raw data: <a href="/api/data">/api/data</a>.</li>
+        <li>Assembled with Claude (Anthropic). Arrangement and normalization only; no figure on this page originates here.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<footer class="chrislawrence-footer">
+  <a href="https://chrislawrence.ca" class="footer-home-link" aria-label="Back to chrislawrence.ca">
+    <img src="/shared-footer/logo-portrait.png" alt="Chris Lawrence" class="footer-logo"
+         width="32" height="32" loading="lazy" onerror="this.remove()">
+    <span class="footer-home-link-text">Back to chrislawrence.ca</span>
+  </a>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var YEAR = 365.25 * 86400000;
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var WINDOW_MONTHS = 120;          // the trailing ten years econ-core reserved
+  var CHART_FROM = Date.UTC(1960, 0, 1);
+  var state = { p: null, norm: "z", orient: false };
+
+  function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function rgba(hex, a) {
+    var n = parseInt(hex.replace("#", ""), 16);
+    return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  function ms(iso) { return Date.parse(iso + "T00:00:00Z"); }
+  function monthWord(ym) { var q = ym.split("-"); return MONTHS[+q[1] - 1] + " " + q[0]; }
+  function monthEnd(ym) { var q = ym.split("-"); return Date.UTC(+q[0], +q[1], 1) - 86400000; }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function fmtSigned(v, places) {
+    var p = places === undefined ? 1 : places;
+    return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(p);
+  }
+  function niceTicks(lo, hi, target) {
+    var span = hi - lo; if (span <= 0) span = 1;
+    var raw = span / target;
+    var mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var norm = raw / mag;
+    var step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
+    var ticks = [];
+    for (var k = Math.ceil(lo / step); k * step <= hi + step * 0.001; k++) {
+      ticks.push(Math.round(k * step * 1e6) / 1e6);
+    }
+    return ticks;
+  }
+
+  // ------------------------------------------------------------------
+  // Time-scaled canvas chart: mixed frequencies, shaded bands, dashed
+  // segments, crosshair tooltip. Shared engine, same as the sibling sites.
+  // ------------------------------------------------------------------
+  function TimeChart(canvasId, tooltipId, opts) {
+    this.canvas = document.getElementById(canvasId);
+    this.tip = document.getElementById(tooltipId);
+    this.opts = opts || {};
+    this.hover = null;
+    this.h = parseInt(this.canvas.getAttribute("height"), 10) || 300;
+    var self = this;
+    this.canvas.addEventListener("mousemove", function (e) { self.onMove(e.clientX); });
+    this.canvas.addEventListener("mouseleave", function () { self.clearHover(); });
+    this.canvas.addEventListener("touchmove", function (e) { if (e.touches[0]) self.onMove(e.touches[0].clientX); }, { passive: true });
+    this.canvas.addEventListener("touchend", function () { self.clearHover(); });
+    this.canvas.addEventListener("touchcancel", function () { self.clearHover(); });
+  }
+
+  TimeChart.prototype.clearHover = function () { this.hover = null; this.tip.style.opacity = 0; this.draw(); };
+
+  TimeChart.prototype.setData = function (series, bands) {
+    this.series = series.filter(function (s) { return s.points.length; });
+    this.bands = bands || [];
+    var union = [];
+    this.series.forEach(function (s) {
+      s.medGap = medianGap(s.points);
+      s.points.forEach(function (pt) { union.push(pt[0]); });
+    });
+    union.sort(function (a, b) { return a - b; });
+    this.union = union.filter(function (v, i) { return i === 0 || v !== union[i - 1]; });
+    this.hover = null;
+    this.draw();
+  };
+
+  function medianGap(points) {
+    if (points.length < 2) return YEAR;
+    var gaps = [];
+    for (var i = 1; i < points.length; i++) gaps.push(points[i][0] - points[i - 1][0]);
+    gaps.sort(function (a, b) { return a - b; });
+    return gaps[Math.floor(gaps.length / 2)];
+  }
+
+  function nearest(points, t) {
+    var lo = 0, hi = points.length - 1;
+    while (lo < hi) { var mid = (lo + hi) >> 1; if (points[mid][0] < t) lo = mid + 1; else hi = mid; }
+    if (lo > 0 && Math.abs(points[lo - 1][0] - t) < Math.abs(points[lo][0] - t)) lo -= 1;
+    return lo;
+  }
+
+  TimeChart.prototype.onMove = function (clientX) {
+    if (!this.geom || !this.union || !this.union.length) return;
+    var rect = this.canvas.getBoundingClientRect();
+    var g = this.geom;
+    var t = this.x0 + (clientX - rect.left - g.left) / (g.right - g.left) * (this.x1 - this.x0);
+    var k = nearest(this.union.map(function (v) { return [v, 0]; }), t);
+    var snapped = this.union[Math.max(0, Math.min(this.union.length - 1, k))];
+    if (snapped === this.hover) return;
+    this.hover = snapped;
+    this.draw();
+    this.showTip(snapped, rect);
+  };
+
+  TimeChart.prototype.showTip = function (t, rect) {
+    var monthly = true;
+    this.series.forEach(function (s) { if (s.medGap < 20 * 86400000) monthly = false; });
+    var html = '<div class="tdate">' + new Date(t).toISOString().slice(0, monthly ? 7 : 10) + "</div>";
+    var shown = 0;
+    this.series.forEach(function (s) {
+      var i = nearest(s.points, t);
+      var pt = s.points[i];
+      if (Math.abs(pt[0] - t) > s.medGap * 0.75) return;
+      html += '<div class="trow"><span class="swatch" style="background:' + css(s.color) + '"></span>' +
+              s.name + '<span class="tval">' + (s.fmt || fmtIdx)(pt[1]) + "</span></div>";
+      shown++;
+    });
+    if (!shown) { this.tip.style.opacity = 0; return; }
+    this.tip.innerHTML = html;
+    this.tip.style.opacity = 1;
+    var g = this.geom;
+    var px = g.left + (t - this.x0) / (this.x1 - this.x0) * (g.right - g.left);
+    var w = this.tip.offsetWidth;
+    var left = px + 14;
+    if (left + w > rect.width - 4) left = px - w - 14;
+    if (left < 4) left = 4;
+    this.tip.style.left = left + "px";
+    this.tip.style.top = "14px";
+  };
+
+  TimeChart.prototype.draw = function () {
+    var cv = this.canvas, ctx = cv.getContext("2d");
+    var dpr = window.devicePixelRatio || 1;
+    var w = cv.clientWidth, h = this.h;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    cv.style.height = h + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    if (!this.series || !this.series.length) return;
+
+    var pad = { l: 48, r: 12, t: 10, b: 26 };
+    var g = { left: pad.l, right: w - pad.r, top: pad.t, bottom: h - pad.b };
+    this.geom = g;
+
+    var x0 = Infinity, x1 = -Infinity, lo = Infinity, hi = -Infinity;
+    this.series.forEach(function (s) {
+      s.points.forEach(function (pt) {
+        if (pt[0] < x0) x0 = pt[0];
+        if (pt[0] > x1) x1 = pt[0];
+        if (pt[1] !== null && isFinite(pt[1])) { if (pt[1] < lo) lo = pt[1]; if (pt[1] > hi) hi = pt[1]; }
+      });
+    });
+    if (!isFinite(lo)) return;
+
+    // Log scale is opt-in per chart and declines when the data reaches zero
+    // or below, because log of a non-positive number is not a rendering
+    // problem to paper over. The decision is made on the RAW range, before
+    // padding: linear padding on a century-long index whose floor sits near
+    // 3 pushes that floor negative, which would silently cancel the very
+    // scale that was asked for. In log mode the padding is multiplicative.
+    // A fixed domain, when given, wins over autoscaling: the small-multiple
+    // grid is only readable if every panel shares one scale.
+    if (this.opts.yDomain) {
+      lo = this.opts.yDomain[0]; hi = this.opts.yDomain[1];
+    }
+    // A shared x domain too, when given. Panels spanning their own histories
+    // are ten unrelated charts in a grid; a shared span also shows honestly
+    // that the loan-officer survey starts in 1990 and tonnage in 2000.
+    if (this.opts.xDomain) {
+      x0 = this.opts.xDomain[0]; x1 = this.opts.xDomain[1];
+    }
+    var useLog = !!this.opts.log && lo > 0;
+    if (this.opts.yDomain) {
+      // no padding: the domain is the domain
+    } else if (useLog) {
+      var lpad = (Math.log10(hi) - Math.log10(lo)) * 0.05 || 0.05;
+      lo = Math.pow(10, Math.log10(lo) - lpad);
+      hi = Math.pow(10, Math.log10(hi) + lpad);
+    } else {
+      var padY = (hi - lo) * 0.08 || 1;
+      lo -= padY; hi += padY;
+      if (this.opts.includeZero && lo > 0) lo = 0;
+      if (this.opts.includeZero && hi < 0) hi = 0;
+    }
+    this.x0 = x0; this.x1 = x1;
+
+    var muted = css("--muted"), grid = css("--grid"), axis = css("--axis");
+    var X = function (t) { return g.left + (t - x0) / Math.max(1, x1 - x0) * (g.right - g.left); };
+    var llo = useLog ? Math.log10(lo) : lo, lhi = useLog ? Math.log10(hi) : hi;
+    var Y = function (v) {
+      var u = useLog ? Math.log10(Math.max(v, 1e-9)) : v;
+      return g.bottom - (u - llo) / (lhi - llo) * (g.bottom - g.top);
+    };
+
+    // bands first, behind everything
+    (this.bands || []).forEach(function (b) {
+      var s = Math.max(x0, b.start), e = Math.min(x1, b.end);
+      if (e <= s) return;
+      ctx.fillStyle = b.fill;
+      ctx.fillRect(X(s), g.top, Math.max(1, X(e) - X(s)), g.bottom - g.top);
+    });
+
+    // y grid
+    ctx.font = "11px system-ui, sans-serif";
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    var yt;
+    if (useLog) {
+      yt = [];
+      for (var dec = Math.floor(llo); dec <= Math.ceil(lhi); dec++) {
+        [1, 2, 5].forEach(function (m) {
+          var v = m * Math.pow(10, dec);
+          if (v >= lo && v <= hi) yt.push(v);
+        });
+      }
+    } else {
+      yt = niceTicks(lo, hi, 6);
+    }
+    var yFmt = this.opts.yFmt || function (v) { return String(Math.round(v * 100) / 100); };
+    yt.forEach(function (v) {
+      var y = Y(v);
+      ctx.strokeStyle = grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(g.left, Math.round(y) + 0.5); ctx.lineTo(g.right, Math.round(y) + 0.5); ctx.stroke();
+      ctx.fillStyle = muted;
+      ctx.fillText(yFmt(v), g.left - 8, y);
+    });
+
+    // the reference rule: a series' own ten-year normal
+    if (this.opts.rule !== undefined && this.opts.rule > lo && this.opts.rule < hi) {
+      var ry = Y(this.opts.rule);
+      ctx.strokeStyle = axis; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(g.left, Math.round(ry) + 0.5);
+      ctx.lineTo(g.right, Math.round(ry) + 0.5); ctx.stroke();
+    }
+
+    // zero line where it matters
+    if (this.opts.rule === undefined && lo < 0 && hi > 0) {
+      ctx.strokeStyle = axis; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(g.left, Math.round(Y(0)) + 0.5); ctx.lineTo(g.right, Math.round(Y(0)) + 0.5); ctx.stroke();
+    }
+
+    // x ticks: years, thinned to what the plot is actually wide enough for.
+    // Thinning by span alone collides on a narrow panel, which is the whole
+    // failure mode of a small-multiple grid.
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    var firstYear = new Date(x0).getUTCFullYear();
+    var lastYear = new Date(x1).getUTCFullYear();
+    var years = lastYear - firstYear;
+    var maxLabels = Math.max(2, Math.floor((g.right - g.left) / 46));
+    var stepY = 1;
+    var steps = [1, 2, 5, 10, 20, 25, 50, 100];
+    for (var si = 0; si < steps.length; si++) {
+      stepY = steps[si];
+      if (years / stepY <= maxLabels) break;
+    }
+    for (var yr = Math.ceil(firstYear / stepY) * stepY; yr <= lastYear; yr += stepY) {
+      var t = Date.UTC(yr, 0, 1);
+      if (t < x0 || t > x1) continue;
+      var px = X(t);
+      ctx.strokeStyle = grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(Math.round(px) + 0.5, g.top); ctx.lineTo(Math.round(px) + 0.5, g.bottom); ctx.stroke();
+      ctx.fillStyle = muted; ctx.fillText(String(yr), px, g.bottom + 6);
+    }
+
+    // axis baseline
+    ctx.strokeStyle = axis; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(g.left, Math.round(g.bottom) + 0.5); ctx.lineTo(g.right, Math.round(g.bottom) + 0.5); ctx.stroke();
+
+    // series
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    var surface = css("--surface-1"), self2 = this;
+    this.series.forEach(function (s) {
+      var color = css(s.color);
+      ctx.strokeStyle = color; ctx.lineWidth = s.width || 2;
+      ctx.setLineDash(s.dash ? [5, 4] : []);
+      ctx.beginPath();
+      var pen = false;
+      var dom = self2.opts.yDomain;
+      s.points.forEach(function (pt) {
+        if (pt[1] === null || !isFinite(pt[1])) { pen = false; return; }
+        var pv = pt[1];
+        if (dom) pv = Math.max(dom[0], Math.min(dom[1], pv));
+        var xx = X(pt[0]), yy = Y(pv);
+        if (!pen) { ctx.moveTo(xx, yy); pen = true; } else { ctx.lineTo(xx, yy); }
+      });
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
+
+    // crosshair + hover markers
+    if (this.hover !== null) {
+      var hx = X(this.hover);
+      ctx.strokeStyle = axis; ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(Math.round(hx) + 0.5, g.top); ctx.lineTo(Math.round(hx) + 0.5, g.bottom); ctx.stroke();
+      ctx.setLineDash([]);
+      var hoverT = this.hover;
+      this.series.forEach(function (s) {
+        var i = nearest(s.points, hoverT);
+        var pt = s.points[i];
+        if (Math.abs(pt[0] - hoverT) > s.medGap * 0.75 || pt[1] === null) return;
+        ctx.beginPath(); ctx.arc(X(pt[0]), Y(pt[1]), 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = css(s.color); ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = surface; ctx.stroke();
+      });
+    }
+  };
+
+  // ------------------------------------------------------------------
+  // normalization: computed here, at render time, from the raw monthly
+  // observations in the payload. Never stored, per econ-core's contract.
+  // ------------------------------------------------------------------
+
+  /* Z-score against the trailing WINDOW_MONTHS, or percentile rank within
+     the same window. Both need a full window behind them before they mean
+     anything, so the first WINDOW_MONTHS observations of every series score
+     as null and simply do not draw. A short window would produce a number,
+     which is worse than a gap: it would look like data. */
+  function normalize(obs, mode, sign) {
+    var out = [];
+    for (var i = 0; i < obs.length; i++) {
+      if (i < WINDOW_MONTHS) { out.push([ms(obs[i][0]), null]); continue; }
+      var win = [], j;
+      for (j = i - WINDOW_MONTHS; j < i; j++) win.push(obs[j][1]);
+      var v = obs[i][1], val;
+      if (mode === "pct") {
+        var below = 0;
+        for (j = 0; j < win.length; j++) if (win[j] <= v) below++;
+        val = below / win.length * 100;
+        if (sign < 0) val = 100 - val;          // orient: stress upward
+      } else {
+        var mean = 0;
+        for (j = 0; j < win.length; j++) mean += win[j];
+        mean /= win.length;
+        var ss = 0;
+        for (j = 0; j < win.length; j++) ss += (win[j] - mean) * (win[j] - mean);
+        var sd = Math.sqrt(ss / win.length);
+        if (!sd) { out.push([ms(obs[i][0]), null]); continue; }
+        val = (v - mean) / sd;
+        if (sign < 0) val = -val;
+      }
+      out.push([ms(obs[i][0]), val]);
+    }
+    return out;
+  }
+
+  function usBands(fromMs) {
+    var p = state.p, out = [];
+    if (!p || !p.recessions || !p.recessions.us) return out;
+    var alpha = parseFloat(css("--band-alpha")) || 0.09;
+    p.recessions.us.bands.forEach(function (b) {
+      var start = ms(b.peak + "-01"), end = monthEnd(b.trough);
+      if (end < fromMs) return;
+      out.push({ start: start, end: end, fill: rgba(css("--series-1"), alpha) });
+    });
+    return out;
+  }
+
+  // ------------------------------------------------------------------
+  // the board
+  // ------------------------------------------------------------------
+  function buildBoard(p) {
+    var rows = (p.board || []).slice();
+    // Signal first, then stale last, then by how recent the reading is.
+    rows.sort(function (a, b) {
+      var as = a.headline && a.headline.state === "signal" ? 0 : 1;
+      var bs = b.headline && b.headline.state === "signal" ? 0 : 1;
+      if (as !== bs) return as - bs;
+      if (!!a.stale !== !!b.stale) return a.stale ? 1 : -1;
+      var ad = (a.headline && a.headline.as_of) || "", bd = (b.headline && b.headline.as_of) || "";
+      return bd.localeCompare(ad);
+    });
+    document.getElementById("board").innerHTML = rows.map(function (r) {
+      var h = r.headline;
+      if (!h) {
+        return '<div class="row" data-state="normal" data-stale="true">' +
+          '<span class="sdot"></span><div><div class="lab">' + esc(r.name) + "</div>" +
+          '<div class="det">This tracker could not be read and has no stored reading to fall back on.</div>' +
+          '<div class="who">' + esc(r.id) + "</div></div>" +
+          '<div class="when"><span class="flag">unavailable</span></div></div>';
+      }
+      return '<a class="row" href="' + esc(r.url) + '" data-state="' + esc(h.state) +
+        '" data-stale="' + (r.stale ? "true" : "false") + '" title="' + esc(h.rule) + '">' +
+        '<span class="sdot"></span><div><div class="lab">' + esc(h.label) + "</div>" +
+        '<div class="det">' + esc(h.detail) + "</div>" +
+        '<div class="who">' + esc(r.name) + "</div></div>" +
+        '<div class="when">' + esc(String(h.as_of).slice(0, 7)) +
+        (r.stale ? '<span class="flag">stale</span>' : "") + "</div></a>";
+    }).join("");
+  }
+
+  // ------------------------------------------------------------------
+  // the sequence
+  // ------------------------------------------------------------------
+  function buildSequence(p) {
+    var clocks = p.clocks || [];
+    if (!clocks.length) return;
+    var span = 0;
+    clocks.forEach(function (c) { span = Math.max(span, Math.abs(c.months)); });
+    span = Math.max(span, 1);
+
+    document.querySelector("#seq-tbl tbody").innerHTML = clocks.map(function (c) {
+      var pctw = Math.abs(c.months) / span * 50;      // half-width each side
+      var isLead = c.months > 0;
+      var bar = '<div class="bar"><span class="zero" style="left:50%"></span>' +
+        (c.months === 0 ? "" :
+          '<i class="' + (isLead ? "lead" : "lag") + '" style="' +
+          (isLead ? "left:50%;width:" + pctw + "%" : "right:50%;width:" + pctw + "%") +
+          '"></i>') + "</div>";
+      // The published figure travels beside the converted one so the sign
+      // conversion can be checked rather than trusted.
+      var unit = c.scale === 3 ? "quarter" : "month";
+      var conv = c.kind === "lag"
+        ? "lag " + c.published + " " + unit + (Math.abs(c.published) === 1 ? "" : "s") + ", negated"
+        : "lead, as published";
+      return "<tr><td>" + esc(c.clock) + "</td>" +
+        '<td><a href="' + esc(c.url) + '">' + esc(c.tracker) + "</a></td>" +
+        "<td>" + fmtSigned(c.months) + " mo</td>" +
+        "<td>" + bar + '<span class="tag">' + esc(conv) + "</span></td>" +
+        "<td>" + c.credited + " of " + c.episodes + "</td>" +
+        "<td>" + (c.span ? esc(c.span[0]) + " to " + esc(c.span[1]) : "—") + "</td></tr>";
+    }).join("");
+
+    var nc = p.no_clock || {};
+    var ids = Object.keys(nc);
+    if (ids.length) {
+      document.getElementById("noclock-note").innerHTML =
+        "<strong>Three trackers are deliberately absent from this table.</strong> " +
+        ids.map(function (id) {
+          return "<em>" + esc(id) + "</em> " + esc(nc[id]).replace(/^[A-Z]/, function (m) { return m.toLowerCase(); });
+        }).join(" ") +
+        " Giving any of them a lead would mean inventing one, which is the easiest thing on this page to get wrong and the hardest to notice.";
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // the small multiples
+  // ------------------------------------------------------------------
+  var smallCharts = {};
+
+  function buildSmalls(p) {
+    var rows = (p.board || []).filter(function (r) { return (r.obs || []).length > WINDOW_MONTHS; });
+    document.getElementById("smalls").innerHTML = rows.map(function (r) {
+      return '<div class="small"><h3>' + esc(r.name) + "</h3>" +
+        "<p>" + esc(r.series_label) + " · " + esc(r.units) + "</p>" +
+        '<div class="plot"><canvas id="sc-' + esc(r.id) + '" height="150"></canvas>' +
+        '<div class="tooltip" id="st-' + esc(r.id) + '"></div></div></div>';
+    }).join("");
+    smallCharts = {};
+    rows.forEach(function (r) {
+      smallCharts[r.id] = new TimeChart("sc-" + r.id, "st-" + r.id, {});
+    });
+    drawSmalls();
+  }
+
+  function drawSmalls() {
+    var p = state.p;
+    if (!p) return;
+    var isZ = state.norm === "z";
+    // One shared domain across every panel: panels that do not share a scale
+    // are ten unrelated charts wearing a grid.
+    var domain = isZ ? [-3, 3] : [0, 100];
+    var fmt = isZ ? function (v) { return v === null ? "—" : fmtSigned(v, 2); }
+                  : function (v) { return v === null ? "—" : v.toFixed(0) + "th"; };
+    (p.board || []).forEach(function (r) {
+      var chart = smallCharts[r.id];
+      if (!chart) return;
+      var sign = state.orient ? (r.stress || 1) : 1;
+      var pts = normalize(r.obs || [], state.norm, sign)
+                  .filter(function (pt) { return pt[0] >= CHART_FROM; });
+      chart.opts.yDomain = domain;
+      chart.opts.xDomain = [CHART_FROM, Date.now()];
+      chart.opts.yFmt = isZ ? function (v) { return v.toFixed(0); }
+                            : function (v) { return v.toFixed(0); };
+      chart.opts.rule = isZ ? 0 : 50;
+      chart.setData([{ name: r.series_label, color: "--series-1", width: 1.6,
+                       points: pts, fmt: fmt }], usBands(CHART_FROM));
+    });
+    document.getElementById("norm-note").innerHTML = isZ
+      ? "Each point is standard deviations from that series' own mean over the previous ten years. Zero is its ten-year normal; the first ten years of every series cannot be scored and are not drawn."
+      : "Each point is the percentile rank of that reading within that series' own previous ten years. Fifty is its ten-year median.";
+  }
+
+  // ------------------------------------------------------------------
+  // tokens, chip, sources
+  // ------------------------------------------------------------------
+  function fillTokens(map) {
+    document.querySelectorAll("[data-tok]").forEach(function (el) {
+      var key = el.getAttribute("data-tok");
+      if (map[key] === undefined) { el.classList.add("tok-missing"); el.textContent = "⟨" + key + "⟩"; }
+      else el.textContent = map[key];
+    });
+  }
+
+  function buildTokens(p) {
+    var map = {}, clocks = p.clocks || [];
+    var crest = clocks.filter(function (c) { return c.tracker === "output" && /crest/i.test(c.clock); })[0];
+    if (crest) map.output_crest = String(crest.months);
+    // The longest-running sample, named rather than asserted.
+    var widest = null;
+    clocks.forEach(function (c) {
+      if (!c.span) return;
+      var years = parseInt(c.span[1].slice(0, 4), 10) - parseInt(c.span[0].slice(0, 4), 10);
+      if (!widest || years > widest.years) widest = { years: years, c: c };
+    });
+    if (widest) {
+      map.widest_span = widest.c.tracker + "'s " + widest.c.credited + " credited episodes span " +
+        widest.c.span[0].slice(0, 4) + " to " + widest.c.span[1].slice(0, 4);
+    }
+    return map;
+  }
+
+  function buildChip(p) {
+    var s = p.summary || {};
+    var chip = document.getElementById("chip");
+    if (s.trackers === undefined) return;
+    var signal = s.signals > 0;
+    var names = (s.signal_ids || []).join(", ");
+    chip.innerHTML = '<span class="dot"></span><span><b>' +
+      s.signals + " of " + s.trackers + " signalling</b>" +
+      (names ? " · " + esc(names) : "") +
+      (s.stale ? " · " + s.stale + " stale" : "") + "</span>";
+    chip.setAttribute("data-state", signal ? "signal" : "normal");
+    chip.hidden = false;
+  }
+
+  function buildSources(p) {
+    document.getElementById("tracker-list").innerHTML = (p.board || []).map(function (r) {
+      return "<li><strong><a href=" + '"' + esc(r.url) + '"' + ">" + esc(r.name) +
+        "</a></strong> · " + esc(r.question) +
+        " Headline series here: " + esc(r.series_label) + ".</li>";
+    }).join("");
+  }
+
+  // ------------------------------------------------------------------
+  // wiring
+  // ------------------------------------------------------------------
+  document.querySelectorAll("[data-norm]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      state.norm = b.getAttribute("data-norm");
+      document.querySelectorAll("[data-norm]").forEach(function (o) {
+        o.setAttribute("aria-pressed", o === b ? "true" : "false");
+      });
+      drawSmalls();
+    });
+  });
+  document.querySelectorAll("[data-orient]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      state.orient = !state.orient;
+      b.setAttribute("aria-pressed", state.orient ? "true" : "false");
+      drawSmalls();
+    });
+  });
+
+  var resizeTimer;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(drawSmalls, 140);
+  });
+  if (window.matchMedia) {
+    var mq = window.matchMedia("(prefers-color-scheme: dark)");
+    (mq.addEventListener ? mq.addEventListener.bind(mq, "change") : mq.addListener.bind(mq))(drawSmalls);
+  }
+
+  fetch("/api/data", { cache: "no-cache" })
+    .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(function (p) {
+      state.p = p;
+      document.getElementById("status").style.display = "none";
+      var s = p.summary || {};
+      document.getElementById("stamp").textContent =
+        s.trackers + " trackers · " + s.live + " read live" +
+        (s.stale ? " · " + s.stale + " stale" : "") + " · " +
+        (p.clocks || []).length + " clocks · refreshed " +
+        (p.board_fetched_at || "").slice(0, 10) + " · built __BUILD_TIME__";
+      fillTokens(buildTokens(p));
+      buildChip(p);
+      buildBoard(p);
+      buildSequence(p);
+      buildSources(p);
+      buildSmalls(p);
+    })
+    .catch(function (e) {
+      document.getElementById("status").textContent =
+        "Could not load the board (" + e.message + "). The updater may be briefly unavailable; try a reload in a minute.";
+    });
+})();
+</script>
+</body>
+</html>
