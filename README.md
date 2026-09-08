@@ -10,7 +10,7 @@ trackers cannot do alone: putting their clocks in order.
 
 No framework, no build step, no package manager. Plain HTML, CSS and vanilla JS on an
 nginx front, with a stdlib-Python aggregator sidecar. Part of the collection on the
-shared [`econ-core`](../econ-core/CONTRACT.md) contract.
+shared [`econ-core`](https://github.com/Lawrence908/econ-core/blob/main/CONTRACT.md) contract.
 
 ## Layout
 
