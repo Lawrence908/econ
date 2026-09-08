@@ -11,7 +11,7 @@ anything itself it is a normalization of series the trackers already published, 
 render time so the raw series stays the artifact of record.
 
 Site eleven, and the reason `econ-core` exists. Written 2026-09-07; every sibling probed
-live from daedalus that day.
+live that day.
 
 ## Why this is now possible
 
