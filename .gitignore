@@ -9,3 +9,10 @@ __pycache__/
 data/*.tmp
 data/board.json
 data/updater-state.json
+
+# Working files that live under src/ but are not part of the page. Kept on
+# disk deliberately; .dockerignore stops them reaching the image, this stops
+# them reaching a commit.
+src/_*
+src/fonts/
+.playwright-mcp/
