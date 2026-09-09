@@ -45,6 +45,7 @@ import json
 import os
 import sys
 import threading
+import time
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
@@ -59,6 +60,13 @@ RECESSIONS_FILE = os.path.join(DATA_DIR, "recessions.json")
 
 CURATED = ["meta", "recessions"]
 FETCH_TIMEOUT = 30
+
+# The warm build races its siblings on a host restart: they are named on the
+# same docker network, so an unready sibling is a DNS failure, not a data
+# failure. Retry the whole build on a backoff rather than let the boot race
+# write a board of carried-forward stale rows that stands until tomorrow's cron.
+WARM_ATTEMPTS = 6
+WARM_BACKOFF = [15, 30, 60, 120, 240]
 
 # How far back the overlay carries observations. Ten years earlier than the
 # chart's own start, because a trailing 10-year z-score needs a decade of
@@ -581,10 +589,24 @@ def main():
     print("econ updater starting (schedule: host cron)", flush=True)
 
     def warm():
-        try:
-            build_board()
-        except Exception as exc:  # noqa: BLE001 - server must come up regardless
-            print("initial board build failed: %s" % exc, flush=True)
+        for attempt in range(1, WARM_ATTEMPTS + 1):
+            try:
+                payload = build_board()
+                errors = payload.get("errors", {})
+                if not errors:
+                    return
+                reason = "%d tracker(s) unreachable: %s" % (
+                    len(errors), ", ".join(sorted(errors)))
+            except Exception as exc:  # noqa: BLE001 - server must come up regardless
+                reason = "build failed: %s" % exc
+            if attempt == WARM_ATTEMPTS:
+                print("warm build giving up after %d attempts (%s)"
+                      % (attempt, reason), flush=True)
+                return
+            delay = WARM_BACKOFF[attempt - 1]
+            print("warm build attempt %d/%d: %s -- retrying in %ds"
+                  % (attempt, WARM_ATTEMPTS, reason, delay), flush=True)
+            time.sleep(delay)
 
     threading.Thread(target=warm, daemon=True).start()
     ThreadingHTTPServer(("0.0.0.0", 8000), Handler).serve_forever()
