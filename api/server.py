@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """econ.chrislawrence.ca aggregator and read-only status API.
 
-The capstone. Ten sites each answer one narrow question; this one asks the
-only question none of them can: what do all ten say at once, and in what
+The capstone. Eleven sites each answer one narrow question; this one asks the
+only question none of them can: what do all eleven say at once, and in what
 order do they usually speak?
 
 **econ authors nothing.** Every figure it publishes was computed by one of
-the ten trackers and is carried here verbatim, with that tracker's own
+the eleven trackers and is carried here verbatim, with that tracker's own
 printed rule attached. Where this file transforms anything it is one of two
 stated operations, and never a new measurement:
 
@@ -34,7 +34,7 @@ Two things this file knows so nobody rediscovers them:
     each names its own clock (crest, trough, alarm, slump, confidence peak).
     The map from tracker to clock is hand-declared below with a note per
     entry. Guessing which key means "lead" would eventually pick the wrong
-    one, and a wrong lead here would be laundered through ten sites'
+    one, and a wrong lead here would be laundered through eleven sites'
     credibility.
 
 HTTP here is read-only. Runs happen via host cron calling
@@ -154,6 +154,18 @@ TRACKERS = [
         "units": "index", "stress": -1,
     },
     {
+        "id": "equity", "host": "equity", "port": 80,
+        "name": "Are Stocks Above Their Trend?",
+        "question": "Is each index's month-end close above its 10-month average?",
+        "url": "https://equity.chrislawrence.ca",
+        # The distance from the average, not the price: a price level is a
+        # century-long trend that a ten-year z-score would read as permanently
+        # unusual. The gap is what the tracker's state is the sign of.
+        "series": "us_spx_gap",
+        "series_label": "S&P 500, distance from 10-month average",
+        "units": "percent", "stress": -1,
+    },
+    {
         "id": "jobs", "host": "jobs", "port": 80,
         "name": "A Century of Work",
         "question": "What has unemployment actually done, over a century?",
@@ -261,6 +273,7 @@ NO_CLOCK = {
     "diesel": "Scores the current refining margin's percentile against its own history. It dates no episodes, so it has no lead to measure.",
     "debt": "Scores a level against a dated historical record (the 1946 wartime peak). It dates no episodes.",
     "jobs": "Scores the Sahm threshold, which is a real-time trigger rather than an episode chronology.",
+    "equity": "Reports a binary month-end trend state for three stock indexes. It counts its below-trend spells but scores none of them against recessions, and a rule that whipsaws this often has no honest lead to rank.",
 }
 
 
@@ -435,7 +448,7 @@ def build_board(dry=False):
 
     payload = {
         "fetched_at": datetime.now(timezone.utc).isoformat(),
-        "note": "Machine-fetched from the ten trackers. econ authors no figure of its own; every value here was computed by the tracker it is attributed to.",
+        "note": "Machine-fetched from the eleven trackers. econ authors no figure of its own; every value here was computed by the tracker it is attributed to.",
         "econcore": econcore.VERSION,
         "errors": errors,
         "board": board,

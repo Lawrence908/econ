@@ -1,6 +1,6 @@
 # The Cycle Board
 
-The capstone of the economic tracker family. Ten narrow trackers, each answering one
+The capstone of the economic tracker family. Eleven narrow trackers, each answering one
 question, read together on one page. Live at [econ.chrislawrence.ca](https://econ.chrislawrence.ca).
 
 **This site authors nothing.** Every state and figure on the board was computed by the
@@ -16,7 +16,7 @@ shared [`econ-core`](https://github.com/Lawrence908/econ-core/blob/main/CONTRACT
 
 ```
 src/index.html    markup, styling, the TimeChart canvas engine, every render function
-data/board.json   machine-fetched from the ten trackers, rewritten wholesale each run
+data/board.json   machine-fetched from the eleven trackers, rewritten wholesale each run
 data/meta.json    curated; deliberately near-empty
 data/recessions.json  vendored from econ-core; never edited here
 api/server.py     the aggregator, the tracker map, the clock map, read-only status API
@@ -31,7 +31,7 @@ observation date it was computed from, and the printed rule. **That block is thi
 entire interface.** It reads nothing else about the page that produced it, which is why
 any tracker can be rewritten without touching this one.
 
-This site fetches no upstream data source and holds no API key. It reads the ten
+This site fetches no upstream data source and holds no API key. It reads the eleven
 trackers over the internal docker network daily at 07:40 Pacific, after each of them has
 refreshed (07:10 through 07:30).
 
@@ -65,8 +65,8 @@ debt a level against the 1946 record, jobs the Sahm threshold. None date episode
 none can be ranked among leads, and the page says so instead of inventing one.
 
 **The small multiples.** Every tracker's headline series scored against its own trailing
-ten years, ten panels on shared axes. Ten panels rather than ten lines on one chart
-because ten overlaid series is a colour puzzle rather than a chart. A toggle switches
+ten years, eleven panels on shared axes. Eleven panels rather than eleven lines on one chart
+because eleven overlaid series is a colour puzzle rather than a chart. A toggle switches
 z-score for percentile rank, and another orients each series so stress reads upward; the
 orientation is declared per tracker in the source and printed, never applied silently.
 
@@ -90,7 +90,7 @@ levels are read.
 
 ## There is no composite score
 
-There will not be one. Ten honest indicators averaged into a single number would be the
+There will not be one. Eleven honest indicators averaged into a single number would be the
 most quotable and least defensible thing on the site, and it would hide exactly the
 disagreements the board exists to show.
 

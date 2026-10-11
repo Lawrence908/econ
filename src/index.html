@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Cycle Board: Ten Trackers, One Page</title>
-<meta name="description" content="Ten narrow economic trackers on one page: what each says right now in its own words with its own printed rule, the computed order in which their clocks have historically rung, and every headline series normalized to a trailing ten-year z-score. Nothing here is authored; every figure was computed by the tracker it is attributed to.">
+<title>The Cycle Board: Eleven Trackers, One Page</title>
+<meta name="description" content="Eleven narrow economic trackers on one page: what each says right now in its own words with its own printed rule, the computed order in which their clocks have historically rung, and every headline series normalized to a trailing ten-year z-score. Nothing here is authored; every figure was computed by the tracker it is attributed to.">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -12,7 +12,7 @@
 <link rel="preload" href="/fonts/oswald.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 /* The only web font on the page, self-hosted so this stays a static site with
-   no third-party fetch. Latin subset, ~13KB, used for ten uppercase words.
+   no third-party fetch. Latin subset, ~13KB, used for eleven uppercase words.
    Oswald, SIL Open Font License 1.1, see fonts/Oswald-OFL.txt. */
 @font-face {
   font-family: "Oswald";
@@ -179,7 +179,7 @@ tr.miss td { background: rgba(179,84,30,0.07); }
 
 /* ---- econ-only additions ---- */
 .board { display: grid; gap: 10px; margin: 4px 0 0; }
-/* Board rows sit on a warmer plane than the card they live in, so the ten
+/* Board rows sit on a warmer plane than the card they live in, so the eleven
    readings read as a distinct object rather than as more of the page. */
 .row {
   display: grid; grid-template-columns: 14px minmax(0,1fr) auto; gap: 12px; align-items: start;
@@ -195,7 +195,7 @@ tr.miss td { background: rgba(179,84,30,0.07); }
 .row .who { font-size: 0.76rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
 .row .right { text-align: right; }
 /* The domain word: which tracker this is, legible before the sentence is read.
-   Condensed, so ten of them stack without the longest ("YIELD CURVE") setting
+   Condensed, so eleven of them stack without the longest ("YIELD CURVE") setting
    the column width; the fallback stack is condensed too, so a font that fails
    to load shifts the weight but not the layout. */
 .row .dom {
@@ -247,16 +247,16 @@ tr.miss td { background: rgba(179,84,30,0.07); }
 <div class="wrap">
   <header>
     <h1>The Cycle Board</h1>
-    <p class="sub">Ten narrow trackers, each answering one question about the US and Canadian economy, read together. This page authors nothing: every state below was computed by the tracker it names, and is shown in that tracker's own words with that tracker's own printed rule attached. What this page adds is arrangement, and one arithmetic the trackers cannot do alone, which is putting their clocks in order.</p>
+    <p class="sub">Eleven narrow trackers, each answering one question about the US and Canadian economy, read together. This page authors nothing: every state below was computed by the tracker it names, and is shown in that tracker's own words with that tracker's own printed rule attached. What this page adds is arrangement, and one arithmetic the trackers cannot do alone, which is putting their clocks in order.</p>
     <p class="chip" id="chip" hidden></p>
-    <p class="stamp" id="stamp">Reading the ten trackers…</p>
+    <p class="stamp" id="stamp">Reading the eleven trackers…</p>
   </header>
 
   <section class="card">
     <h2>What each tracker says right now</h2>
     <p class="cap">One row per tracker, the ones showing a signal first. The bold clause and the figures beneath it are rendered verbatim from each tracker's published status block; hover a row to see the rule that produced it. Click through for the history, the episode table, and the sources.</p>
     <div class="board" id="board"></div>
-    <p class="status" id="status">Reading the ten trackers…</p>
+    <p class="status" id="status">Reading the eleven trackers…</p>
   </section>
 
   <section class="card">
@@ -275,7 +275,7 @@ tr.miss td { background: rgba(179,84,30,0.07); }
 
   <section class="card">
     <h2>Every tracker's headline series, on one scale</h2>
-    <p class="cap">A crack spread in dollars a barrel and a survey balance in net percent cannot share an axis. These can: each series is scored against its own trailing ten years, so every panel reads in the same units of "unusual for this series lately". Ten panels rather than ten lines on one chart, because ten overlaid series is a colour puzzle rather than a chart. Shared axes throughout; shaded bands are US recessions.</p>
+    <p class="cap">A crack spread in dollars a barrel and a survey balance in net percent cannot share an axis. These can: each series is scored against its own trailing ten years, so every panel reads in the same units of "unusual for this series lately". Eleven panels rather than eleven lines on one chart, because eleven overlaid series is a colour puzzle rather than a chart. Shared axes throughout; shaded bands are US recessions.</p>
     <div class="controls">
       <div class="group" role="group" aria-label="Normalization">
         <span class="glabel">Scale</span>
@@ -298,21 +298,21 @@ tr.miss td { background: rgba(179,84,30,0.07); }
         <li><strong>Nothing here is authored.</strong> Every state, figure and rule on the board was computed by the tracker it is attributed to and is carried across verbatim. If this page and a tracker ever disagree, the tracker is right and this page has a bug.</li>
         <li><strong>Two transforms happen here and nowhere else.</strong> Overlay series are resampled to monthly, keeping the last observation in each month, because a daily spread and a quarterly survey cannot otherwise share an axis. And the z-score or percentile is computed in your browser from the raw monthly observations in the payload, never stored, because the raw series is the record and a normalized one is a view of it.</li>
         <li><strong>A z-score against a trailing ten years is a statement about recent history, not about levels.</strong> Industrial production and federal debt both rise across decades; scoring them this way asks whether they are unusual for the last ten years, which is the right question for a cycle board and the wrong one for comparing levels. The trackers are where levels are read.</li>
-        <li><strong>There is no composite score on this page and there will not be one.</strong> Ten honest indicators averaged into a single number would be the most quotable and least defensible thing here, and it would hide exactly the disagreements the board exists to show.</li>
+        <li><strong>There is no composite score on this page and there will not be one.</strong> Eleven honest indicators averaged into a single number would be the most quotable and least defensible thing here, and it would hide exactly the disagreements the board exists to show.</li>
         <li><strong>A tracker that cannot be reached keeps its last known row</strong>, marked stale and dated to its own last observation. A stale reading is still a true reading about its own date; presenting it as today's would not be.</li>
       </ul>
     </div>
   </section>
 
   <section class="card">
-    <h2>The ten trackers, and the contract underneath them</h2>
+    <h2>The eleven trackers, and the contract underneath them</h2>
     <div class="prose" style="margin-top:6px">
       <ul id="tracker-list"></ul>
       <h3>Plumbing</h3>
       <ul>
         <li>Each tracker publishes <code>analysis.status.headline</code>: a binary state, a label, the figures behind it, the observation date it was computed from, and the printed rule. That block is this page's entire interface; it reads nothing else about the page that produced it, which is why a tracker can be rewritten without touching this one.</li>
         <li>The clock map, which says where each tracker's median lead lives in its payload and what that clock is called, is hand-declared here with a note per entry. Every tracker names its own clock (crest, trough, alarm, slump, confidence peak), so inferring which statistic means "lead" would eventually pick the wrong one.</li>
-        <li>This page fetches no upstream data source and holds no API key. It reads the ten trackers over the internal network on a daily schedule, after each of them has refreshed.</li>
+        <li>This page fetches no upstream data source and holds no API key. It reads the eleven trackers over the internal network on a daily schedule, after each of them has refreshed.</li>
         <li>Series, provenance and revision policy all follow the shared <a href="https://github.com/Lawrence908">econ-core</a> contract.</li>
         <li>Raw data: <a href="/api/data">/api/data</a>.</li>
         <li>Assembled with Claude (Anthropic). Arrangement and normalization only; no figure on this page originates here.</li>
@@ -493,7 +493,7 @@ tr.miss td { background: rgba(179,84,30,0.07); }
       lo = this.opts.yDomain[0]; hi = this.opts.yDomain[1];
     }
     // A shared x domain too, when given. Panels spanning their own histories
-    // are ten unrelated charts in a grid; a shared span also shows honestly
+    // are eleven unrelated charts in a grid; a shared span also shows honestly
     // that the loan-officer survey starts in 1990 and tonnage in 2000.
     if (this.opts.xDomain) {
       x0 = this.opts.xDomain[0]; x1 = this.opts.xDomain[1];
@@ -689,12 +689,12 @@ tr.miss td { background: rgba(179,84,30,0.07); }
   // ------------------------------------------------------------------
   // The word that names the domain, not the question. Each tracker titles
   // itself as a question ("Is the Consumer Holding Up?"), which is the right
-  // headline and the wrong label: you cannot scan ten questions. Hand-declared
+  // headline and the wrong label: you cannot scan eleven questions. Hand-declared
   // rather than derived, because the id is a slug and a slug is not a noun.
   var DOMAIN = {
     yield: "Yield Curve", housing: "Housing", credit: "Credit",
     lending: "Lending", freight: "Freight", consumer: "Consumer",
-    output: "Output", jobs: "Jobs", debt: "Debt", diesel: "Diesel"
+    output: "Output", equity: "Equities", jobs: "Jobs", debt: "Debt", diesel: "Diesel"
   };
   function domainWord(r) { return DOMAIN[r.id] || String(r.id || "").replace(/[-_]/g, " "); }
 
@@ -799,7 +799,7 @@ tr.miss td { background: rgba(179,84,30,0.07); }
     if (!p) return;
     var isZ = state.norm === "z";
     // One shared domain across every panel: panels that do not share a scale
-    // are ten unrelated charts wearing a grid.
+    // are eleven unrelated charts wearing a grid.
     var domain = isZ ? [-3, 3] : [0, 100];
     var fmt = isZ ? function (v) { return v === null ? "—" : fmtSigned(v, 2); }
                   : function (v) { return v === null ? "—" : v.toFixed(0) + "th"; };
