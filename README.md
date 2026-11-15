@@ -9,7 +9,7 @@ printed rule attached. What this page adds is arrangement, and one arithmetic th
 trackers cannot do alone: putting their clocks in order.
 
 No framework, no build step, no package manager. Plain HTML, CSS and vanilla JS on an
-nginx front, with a stdlib-Python aggregator sidecar. Part of the collection on the
+nginx front (shared by the whole family, see below), with a stdlib-Python aggregator sidecar. Part of the collection on the
 shared [`econ-core`](https://github.com/Lawrence908/econ-core/blob/main/CONTRACT.md) contract.
 
 ## Layout
@@ -93,6 +93,21 @@ levels are read.
 There will not be one. Eleven honest indicators averaged into a single number would be the
 most quotable and least defensible thing on the site, and it would hide exactly the
 disagreements the board exists to show.
+
+## Serving the whole family
+
+Since 2026-11-14 this repo's nginx container serves all twelve sites, not just the
+board. Each sibling's `src/` comes in as a named build context and its `data/` as a
+read-only mount (`compose.yaml`); `nginx.conf` picks the site by Host header, and
+`tracker-locations.conf` holds the per-site rules every tracker used to carry in its
+own nginx. The container answers on `homelab-web` to every old site name (`debt`,
+`yield`, ...), so `http://<site>:80` still works for Caddy, Uptime Kuma and the
+aggregator below. Each sibling's updater still runs from its own repo.
+
+Editing a sibling's `src/` goes live through that sibling's `./deploy.sh`, which
+rebuilds its updater and then runs this repo's `./deploy.sh`. A new tracker needs three
+lines here: an `additional_contexts` entry, a `COPY --from` in the `Dockerfile`, and a
+server block in `nginx.conf`, plus an alias and a data mount in `compose.yaml`.
 
 ## The updater
 

@@ -4,10 +4,27 @@ networks:
     name: homelab-web
 
 services:
+  # The static front for the whole tracker family (consolidated 2026-11-14):
+  # econ plus the eleven sibling sites, one nginx, picked by Host header. Each
+  # sibling's updater still runs from its own repo; only the nginx moved here.
+  # After editing any sibling's src/, redeploy from here (the sibling deploy.sh
+  # files call this one).
   econ:
     build:
       context: .
       dockerfile: Dockerfile
+      additional_contexts:
+        debt: ../debt/src
+        jobs: ../jobs/src
+        yield: ../yield/src
+        housing: ../housing/src
+        credit: ../credit/src
+        lending: ../lending/src
+        consumer: ../consumer/src
+        output: ../output/src
+        freight: ../freight/src
+        equity: ../equity/src
+        diesel: ../diesel/src
       args:
         BUILD_TIME: ${BUILD_TIME:-unknown}
     container_name: econ
@@ -15,12 +32,39 @@ services:
     depends_on:
       - econ-updater
     networks:
-      - web
+      web:
+        # The old per-site container names. Caddy, Uptime Kuma, the catalog
+        # health URLs and econ-updater's sibling fetches all address the sites
+        # as http://<site>:80, so answering to those names keeps every caller
+        # working unchanged.
+        aliases:
+          - debt
+          - jobs
+          - yield
+          - housing
+          - credit
+          - lending
+          - consumer
+          - output
+          - freight
+          - equity
+          - diesel
     ports:
       - "8137:80"
     volumes:
-      # Read-only here: nginx serves the data layer, the updater owns it.
-      - ./data:/usr/share/nginx/html/data:ro
+      # Read-only here: nginx serves each data layer, the updaters own them.
+      # diesel has no entry: its front reads everything through /api/.
+      - ./data:/usr/share/nginx/html/econ/data:ro
+      - ../debt/data:/usr/share/nginx/html/debt/data:ro
+      - ../jobs/data:/usr/share/nginx/html/jobs/data:ro
+      - ../yield/data:/usr/share/nginx/html/yield/data:ro
+      - ../housing/data:/usr/share/nginx/html/housing/data:ro
+      - ../credit/data:/usr/share/nginx/html/credit/data:ro
+      - ../lending/data:/usr/share/nginx/html/lending/data:ro
+      - ../consumer/data:/usr/share/nginx/html/consumer/data:ro
+      - ../output/data:/usr/share/nginx/html/output/data:ro
+      - ../freight/data:/usr/share/nginx/html/freight/data:ro
+      - ../equity/data:/usr/share/nginx/html/equity/data:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/health || exit 1"]
       interval: 30s
